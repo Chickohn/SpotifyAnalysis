@@ -11,24 +11,39 @@ def load_and_combine_json(file_pattern="*.json"):
     """
     all_data = []
     for file_name in glob.glob(file_pattern):
-        with open(file_name, "r", encoding="utf-8") as f:
-            file_data = json.load(f)
-            all_data.extend(file_data)
+        if "video" not in file_name.lower():
+            with open(file_name, "r", encoding="utf-8") as f:
+                file_data = json.load(f)
+                all_data.extend(file_data)
     
     df = pd.DataFrame(all_data)
     return df
 
 def clean_and_prepare(df):
     """
-    Cleans and prepares the data for analysis.
+    Cleans and prepares the DataFrame for analysis.
+    - Handles missing values properly based on whether an entry is music, podcast, or audiobook.
     """
-    # Convert timestamps
+
+    # Convert timestamps to datetime
     df['ts'] = pd.to_datetime(df['ts'], errors='coerce')
 
-    # Convert milliseconds played
+    # Convert ms_played to numeric
     df['ms_played'] = pd.to_numeric(df['ms_played'], errors='coerce')
 
-    # Extract date/time components for easier grouping
+    # Identify content type
+    df['content_type'] = "Music"  # Default to music
+    df.loc[df['episode_name'].notna(), 'content_type'] = "Podcast"
+    df.loc[df['audiobook_title'].notna(), 'content_type'] = "Audiobook"
+
+    # Handle missing values **ONLY for music entries**
+    music_entries = df['content_type'] == "Music"
+    
+    df.loc[music_entries, 'master_metadata_track_name'] = df['master_metadata_track_name'].fillna("Unknown Track")
+    df.loc[music_entries, 'master_metadata_album_artist_name'] = df['master_metadata_album_artist_name'].fillna("Unknown Artist")
+    df.loc[music_entries, 'master_metadata_album_album_name'] = df['master_metadata_album_album_name'].fillna("Unknown Album")
+
+    # Extract additional date/time components
     df['date'] = df['ts'].dt.date
     df['year'] = df['ts'].dt.year
     df['month'] = df['ts'].dt.month
@@ -36,18 +51,11 @@ def clean_and_prepare(df):
     df['hour'] = df['ts'].dt.hour
     df['day_of_week'] = df['ts'].dt.day_name()
 
-    # Create minutes played for convenience
+    # Convert milliseconds played into minutes
     df['minutes_played'] = df['ms_played'] / 1000 / 60
 
-    # Fill missing strings with something more uniform
-    df['master_metadata_track_name'] = df['master_metadata_track_name'].fillna("Unknown Track")
-    df['master_metadata_album_artist_name'] = df['master_metadata_album_artist_name'].fillna("Unknown Artist")
-    df['master_metadata_album_album_name'] = df['master_metadata_album_album_name'].fillna("Unknown Album")
-    
-    # Drop rows that have a null timestamp or ms_played if desired
-    df = df.dropna(subset=['ts', 'ms_played'])
-    
     return df
+
 
 def analyze_listening_over_time(df):
     """
