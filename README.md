@@ -1,6 +1,6 @@
 # Spotify Extended Data Analysis
 
-This repository contains a Python script and some example Spotify JSON files representing **my** personal listening history data. If you'd like to analyze your own data, simply delete the JSON files included here and replace them with your own Spotify extended history files.
+This repository contains a Python script and some example Spotify JSON files representing **my** personal listening history data. If you'd like to analyse your own data, simply delete the JSON files included here and replace them with your own Spotify extended history files.
 
 ## Prerequisites
 
@@ -17,21 +17,32 @@ This repository contains a Python script and some example Spotify JSON files rep
 
 ## Usage
 
-1. Make sure your Spotify streaming history JSON files (e.g., StreamingHistory0.json, StreamingHistory1.json, etc.) are in the same directory as the script.
-2. Run the analysis script:
-```python
-python spotify_analysis.py
-```
+1. Make sure your Spotify streaming history JSON files are in the same directory as the script.
+2. Run the following scripts (Make sure the directory of the terminal is in the working folder):
+   ```python
+   python -m venv venv
+   ```
+   (Or `python3` if `python` doesn't work!)
 
-3. The script will:
+   Then on Windows:
+   ```python
+   venv/scripts/activate
+   ```
+   Or MacOS:
+   ```python
+   source venv/bin/activate
+   ```
+   Then finally:
+   ```python
+   python spotify_analysis.py
+   ```
 
-  - Automatically detect and load all .json files in the folder.
+4. The script will:
+
+  - Automatically detect and load all `.json` files in the folder.
   - Merge them into a single dataset.
   - Clean and prepare the data.
   - Perform various analyses, printing summary results and generating visualizations such as:
     - Daily listening trend
     - Top artists, tracks, and albums
     - Listening by hour and day of week
-
-## Customizing
-- Delete or rename the provided JSON files before adding your own data if you don’t want to mix my example data with yours.
